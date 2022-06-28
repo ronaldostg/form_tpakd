@@ -23,12 +23,12 @@ class CreateTblLoanRegisterTable extends Migration
             $table->text('fotoKTP');
             $table->string('jenisKelamin');
             $table->date('tgl_lahir'); 
-            $table->String('usahaKabupaten');
-            $table->String('usahaKecamatan');
-            $table->String('usahaDesaKel');
+            $table->string('usahaKabupaten');
+            $table->string('usahaKecamatan');
+            $table->string('usahaDesaKel');
             $table->text('detailAlamat');
-            $table->string('jlhPengajuan');
-            $table->string('jangkaWaktu');
+            $table->integer('jlhPengajuan');
+            $table->integer('jangkaWaktu');
             $table->string('jnsUsaha');
             $table->string('ketIzinUsaha');
             $table->string('npwp')->nullable();

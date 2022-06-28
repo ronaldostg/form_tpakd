@@ -7,6 +7,7 @@ use App\Models\FormTpakdModel;
 use App\Http\Controllers\Helper\HelperController as helperController;
 use Image;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 
 class FormController extends Controller
@@ -81,77 +82,140 @@ class FormController extends Controller
      */
     public function store(Request $request)
     {
+        // var_dump($request->cekPengajuan);
+        // exit;
 
-        $image = $request->file('fotoKTP');
-        $imageTptUsaha = $request->file('fotoTempatUsaha');
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required',
+            'noNIK' => 'required|min:16',
+            
+            'email' => 'nullable|email:rfc,dns',
+            'notelp1' => 'required|min:11',
+            'jenisKelamin' => 'required|in:laki-laki,perempuan',
+            'fotoKTP' => 'required|mimes:jpeg,jpg,png',
+            'notelp2' => 'nullable|min:11',
+            'tgl_lahir' => 'required',
+            'usahaKabupaten' => 'required',
+            'usahaKecamatan' => 'required',
+            'usahaDesaKel' => 'required',
+            'detailAlamat' => 'required',
+            'jlhPengajuan' => 'required',
+            'jangkaWaktu' => 'required|in:1,2,3,4,5',
+            'jnsUsaha' => 'required',
+            'ketIzinUsaha' => 'required',
+            'npwp' => 'nullable|min:15',
+            'fotoTempatUsaha' => 'required|mimes:jpeg,jpg,png',
+            'cekPengajuan' => 'required',
+     
+        ],[
+            'nama.required' => 'Mohon Isi Nama Anda',
+            'noNIK.required' => 'Mohon Isi NIK Anda',
+            'noNIK.min' => 'NIK harus minimum 16 karakter',
+
+            'email.email' => 'Wajib dalam bentuk format email',
+            'email.dns' => 'Email anda tidak punya nama domain',
+            
+            'notelp1.required' => 'Mohon Isi No. Telepon Anda',
+            'notelp1.min' => 'NIK harus minimum 11 karakter',
+            'notelp2.min' => 'NIK harus minimum 11 karakter',
+
+            'jenisKelamin.required' => 'Mohon Isi Jenis Kelamin Anda',
+            'jenisKelamin.in' => 'Jenis Kelamin tidak terdaftar',
+
+            'fotoKTP.required' => 'Mohon Upload Foto KTP Anda',
+            // 'fotoKTP.mimes' => 'Mohon Upload Foto KTP Anda',
+            'fotoKTP.mimes' => 'Foto wajib dalam format PNG, JPG, atau JPEG',
+            'usahaKabupaten.required' => 'Mohon Isi Kabupaten Anda',
+            'usahaKecamatan.required' => 'Mohon Isi Kecamatan Anda',
+            'usahaDesaKel.required' => 'Mohon Isi Desa / Kelurahan Anda',
+            
+            'jangkaWaktu.required' => 'Mohon Isi Jangka Waktu Pinjaman Anda',
+            'jangkaWaktu.required' => 'Pilihan jangka waktu tidak ada',
+            
+            
+            'jnsUsaha.required' => 'Mohon Isi Jenis Pinjaman Anda',
 
 
-        $destinationPath = public_path('/thumbnail');
-        $imgFile = Image::make($image->getRealPath());
-        $imgFileTptUsaha = Image::make($imageTptUsaha->getRealPath());
 
-        $imgFile->resize(480, 480, function ($constraint) {
-            $constraint->aspectRatio();
-        })->encode('jpg', 30);
-
-        $imgFileTptUsaha->resize(480, 480, function ($constraint) {
-            $constraint->aspectRatio();
-        })->encode('jpg', 30);
+            'detailAlamat.required' => 'Mohon Isi Alamat Usaha Anda',
+            'ketIzinUsaha.required' => 'Mohon Isi Jenis Pembiayaan Anda',
+            
+            'npwp.min' => 'NPWP harus minimum 15 karakter',
+            'fotoTempatUsaha.required' => 'Mohon Isi Jenis Pembiayaan Anda',
+            'fotoTempatUsaha.mimes' => 'Foto wajib dalam format PNG, JPG, atau JPEG',
+            'cekPengajuan.required' => 'Mohon beri centang pengajuan',
 
 
-
-
-        $gbrKtp = base64_encode($imgFile);
-        $gbrTempatUsaha = base64_encode($imgFileTptUsaha);
-
-
-
-        // $password = 'c3VtdXRyaXRlbA==';
-        // $method = 'aes-256-cbc';
-        // $iv = chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0);
-
-        // $password = substr(hash('sha256', $password, true), 0, 32);
+        ]);
         
-        
-        // $encrypted = base64_encode(openssl_encrypt($request->notelp1, $method, $password, OPENSSL_RAW_DATA, $iv));
-        // $encrypted = base64_encode(openssl_encrypt($request->notelp1, $method, $password, OPENSSL_RAW_DATA, $iv));
-
-        // $decrypted = openssl_decrypt(base64_decode($encrypted), $method, $password, OPENSSL_RAW_DATA, $iv);
-
-
-        $formTpakd = [
-            'nama' => $request->nama,
-            'noNIK' => helperController::encryptData($request->noNIK),
-            
-            
-            
-            'email' => $request->email,
-            // 'notelp1' => base64_encode(openssl_encrypt($request->notelp1, $method, $password, OPENSSL_RAW_DATA, $iv)),
-            'notelp1' => helperController::encryptData($request->notelp1),
-            'jenisKelamin' => $request->jenisKelamin,
-            'fotoKTP' => $gbrKtp,
-            'notelp2' => helperController::encryptData($request->notelp2),
-            'tgl_lahir' => $request->tgl_lahir,
-            'usahaKabupaten' => $request->usahaKabupaten,
-            'usahaKecamatan' => $request->usahaKecamatan,
-            'usahaDesaKel' => $request->usahaDesaKel,
-            'detailAlamat' => $request->detailAlamat,
-            'jlhPengajuan' => $request->jlhPengajuan,
-            'jangkaWaktu' => $request->jangkaWaktu,
-            'jnsUsaha' => $request->jnsUsaha,
-            'ketIzinUsaha' => $request->ketIzinUsaha,
-            'npwp' => helperController::encryptData($request->npwp),
-            'fotoTempatUsaha' => $gbrTempatUsaha,
-
-        ];
- 
-
- 
-        if (FormTpakdModel::create($formTpakd) && $request->checkPengajuan == '1') {
-            return redirect('/form-tpakd')->with('success', 'Data Pengajuan berhasil dikirimkan');
+        if ($validator->fails()) {
+            // Session::flash('error', $validator->messages()->first());
+            // echo $validator->messages()->first();
+            // exit;
+            // return Redirect::back()->withErrors($validator);
+            return redirect()->back()->withInput()->withErrors($validator);
         } else {
-            return redirect()->back()->withInput()->with('error', 'Gagal mengirim data');
+            
+            $image = $request->file('fotoKTP');
+            $imageTptUsaha = $request->file('fotoTempatUsaha');
+
+
+            $destinationPath = public_path('/thumbnail');
+            $imgFile = Image::make($image->getRealPath());
+            $imgFileTptUsaha = Image::make($imageTptUsaha->getRealPath());
+
+            $imgFile->resize(480, 480, function ($constraint) {
+                $constraint->aspectRatio();
+            })->encode('jpg', 30);
+
+            $imgFileTptUsaha->resize(480, 480, function ($constraint) {
+                $constraint->aspectRatio();
+            })->encode('jpg', 30);
+
+
+
+
+            $gbrKtp = base64_encode($imgFile);
+            $gbrTempatUsaha = base64_encode($imgFileTptUsaha);
+            
+
+            $request->jlhPengajuan =  floatval(str_replace(".", "", $request->jlhPengajuan ));
+            $request->notelp1 =  str_replace("-", "", $request->notelp1);
+            $request->notelp2=  $request->notelp2 ? str_replace("-", "", $request->notelp2) : "";
+
+
+            $formTpakd = [
+                'nama' => $request->nama,
+                'noNIK' => helperController::encryptData($request->noNIK),
+                'email' => $request->email,
+                'notelp1' => helperController::encryptData($request->notelp1),
+                'jenisKelamin' => $request->jenisKelamin,
+                'fotoKTP' => helperController::encryptData($gbrKtp),
+                'notelp2' => helperController::encryptData($request->notelp2),
+                'tgl_lahir' => $request->tgl_lahir,
+                'usahaKabupaten' => $request->usahaKabupaten,
+                'usahaKecamatan' => $request->usahaKecamatan,
+                'usahaDesaKel' => $request->usahaDesaKel,
+                'detailAlamat' => $request->detailAlamat,
+                'jlhPengajuan' => $request->jlhPengajuan,
+                'jangkaWaktu' => $request->jangkaWaktu,
+                'jnsUsaha' => $request->jnsUsaha,
+                'ketIzinUsaha' => $request->ketIzinUsaha,
+                'npwp' => helperController::encryptData($request->npwp),
+                'fotoTempatUsaha' => $gbrTempatUsaha,
+                
+            ];
+
+            // echo json_encode($formTpakd);
+            if (FormTpakdModel::create($formTpakd)) {
+                return redirect()->back()->with('success', 'Data Pengajuan berhasil dikirimkan');
+            } else {
+                return redirect()->back()->withInput()->with('error', 'Data Pengajuan gagal terkirim');
+            }
+
         }
+
+       
     }
 
     // /**
@@ -195,9 +259,7 @@ class FormController extends Controller
     //  * @return \Illuminate\Http\Response
     //  */
     public function destroy($id)
-    {
-        //
-        // dd(request('id'));
+    { 
         FormTpakdModel::destroy(request('id'));
         return redirect('/load-data');
     }

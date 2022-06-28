@@ -23,21 +23,11 @@ Route::get('/load-data',[FormController::class,'loadData']);
 
 Route::resource('form-tpakd', FormController::class);
 
-// Route::get('form-daerah', [DependantDropdownController::class,'formDaerah']);
-
-
-
-// Route::get('provinces', [DependantDropdownController::class,'provinces'])->name('provinces');
-// Route::get('cities', [DependantDropdownController::class,'cities'])->name('cities');
-
-// Route::get('districts', [DependantDropdownController::class,'districts'])->name('districts');
-// Route::get('villages', [DependantDropdownController::class,'villages'])->name('villages');
-
-
 
 Route::get('kabupaten', [WilayahController::class,'getKabupaten'])->name('kabupaten');
 Route::get('kecamatan', [WilayahController::class,'getKecamatan'])->name('kecamatan');
 Route::get('desakel', [WilayahController::class,'getDesaKel'])->name('desakel');
+Route::get('tujuankredit', [WilayahController::class,'getTujuanKredit'])->name('tujuankredit');
 
  
 

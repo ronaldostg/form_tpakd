@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Helper\HelperController as helperController;
+use Illuminate\Support\Facades\Hash;
 
 
 class ApiTpakdController extends Controller
@@ -16,45 +17,62 @@ class ApiTpakdController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
+
     {
 
-        $dataForm = DB::table('tbl_loan_register')->orderBy('created_at', 'desc')->get();
-        // $dataForm = DB::table('tbl_loan_register')->where('id','=',10)->get();
-
-        // for ($i=0; $i < count($dataForm) ; $i++) { 
-        //     # code...
-        //     $dataForm[$i]->noNIK = helperController::decryptData($dataForm->noNIK);
-        //     $dataForm[$i]->notelp1 = helperController::decryptData($dataForm->notelp1);
-        //     $dataForm[$i]->notelp2 = helperController::decryptData($dataForm->notelp2);
-        //     $dataForm[$i]->npwp = helperController::decryptData($dataForm->npwp);
-
-        // }
-
-        foreach ($dataForm as $ds) {
-            $ds->noNIK = helperController::decryptData($ds->noNIK);
-            $ds->notelp1 = helperController::decryptData($ds->notelp1);
-            $ds->notelp2 = helperController::decryptData($ds->notelp2);
-            $ds->npwp = helperController::decryptData($ds->npwp);
-        }
 
 
-        if ($dataForm) {
-            $data = [
-                'status' => 200,
-                'message' => 'Berhasil mengambil data',
-                'data' => $dataForm
-                // 'data'=>gettype($dataForm)/\
-            ];
+
+        $token = $request->bearerToken();
+
+
+        if ($token == null) {
+            $data['rc'] = "01";
+            $data['message'] = "maaf, masukkan token anda";
+            
         } else {
-            $data = [
-                'status' => 400,
-                'message' => 'Data tidak ditemukan',
-                'data' => $dataForm
+            if (env('API_KEY') != $token) {
+                $data['rc'] = "02";
+                $data['message'] = 'token salah';
+            } else {
 
-            ];
+                if (env('API_KEY') == $token) {
+
+
+                    $dataForm = DB::table('tbl_loan_register')->orderBy('created_at', 'desc')->get();
+
+
+                    foreach ($dataForm as $ds) {
+                        $ds->id =helperController::encryptData($ds->id);
+                       
+                        $ds->tgl_lahir = date_format(date_create($ds->tgl_lahir), 'd-M-Y');
+                        $ds->created_at = date_format(date_create($ds->created_at), 'd-M-Y h:i:s');
+                        $ds->updated_at = date_format(date_create($ds->updated_at), 'd-M-Y h:i:s');
+                        $ds->jlhPengajuan = number_format($ds->jlhPengajuan);
+                    }
+
+
+                    if ($dataForm) {
+                        $data = [
+                            'rc' => '00',
+                            'message' => 'Berhasil mengambil data',
+                            'data' => $dataForm
+                        ];
+                    } else {
+                        $data = [
+                            'rc' => '03',
+                            'message' => 'Data tidak ditemukan',
+                            'data' => $dataForm
+
+                        ];
+                    }
+
+
+                   
+                }
+            }
         }
-
         return response()->json(
             $data
         );
@@ -76,33 +94,75 @@ class ApiTpakdController extends Controller
      * @param  \App\Models\FormTpakdModel  $formTpakdModel
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
         //
 
-        // print_r($id);
+        // $id = ;
+        // echo helperController::encryptData($id);
+
+        $id = helperController::decryptData(request('data_id'));
+        // echo $id;
+        // exit;
+        
+        $token = $request->bearerToken();
+
         $dataForm = DB::table('tbl_loan_register')->where('id', '=', $id)->first();
 
-        $dataForm->noNIK = helperController::decryptData($dataForm->noNIK);
-        $dataForm->notelp1 = helperController::decryptData($dataForm->notelp1);
-        $dataForm->notelp2 = helperController::decryptData($dataForm->notelp2);
-        $dataForm->npwp = helperController::decryptData($dataForm->npwp);
-
-        if ($dataForm) {
-            $data = [
-                'status' => 200,
-                'message' => 'Berhasil mengambil data',
-                'data' => $dataForm
-                // 'data'=>gettype($dataForm)/\
-            ];
+        if ($token == null) {
+            $data['rc'] ="01";
+            $data['message'] ="maaf, masukkan token anda";
         } else {
-            $data = [
-                'status' => 400,
-                'message' => 'Data tidak ditemukan',
-                'data' => $dataForm
+            if (env('API_KEY') != $token) {
+                $data['rc'] = '02';
+                $data['message'] = 'token salah';
+            } else {
 
-            ];
+                if($id=='') {
+                    $data['rc'] =  "03";
+                    $data['message'] =  "parameter id kosong";
+                }
+                
+                else {
+
+                    $dataForm = DB::table('tbl_loan_register')->where('id', '=', $id)->first();
+                    // var_dump($dataForm);
+                    // exit;
+                    
+                    if ($dataForm==null) {
+                        $data = [
+                            'rc' => '04',
+                            'message' => 'Data tidak ditemukan',
+                            'data' => $dataForm
+
+                        ];
+
+                    } else {
+                        
+                        $dataForm->id =helperController::encryptData($dataForm->id);
+                        $dataForm->tgl_lahir = date_format(date_create($dataForm->tgl_lahir), 'd-M-Y ');
+                        $dataForm->created_at = date_format(date_create($dataForm->created_at), 'd-M-Y h:i:s');
+                        $dataForm->updated_at = date_format(date_create($dataForm->updated_at), 'd-M-Y h:i:s');
+                        $dataForm->jlhPengajuan = number_format($dataForm->jlhPengajuan);
+                        $data = [
+                            'rc' => '00',
+                            'message' => 'Berhasil mengambil data',
+                            'data' => $dataForm
+                            // 'data'=>gettype($dataForm)/\
+                        ];
+                    }
+
+
+                }
+            }
         }
+        
+        // exit;
+       
+        
+        // exit;
+
+        // 
 
 
         return response()->json(

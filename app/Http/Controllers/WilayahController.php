@@ -98,6 +98,28 @@ class WilayahController extends Controller
 
     }
 
+    public function getTujuanKredit(){
+        $listTujuanKredit = DB::table('tbl_tujuan_kredit')->get();
+        // // $kabupaten = DB::table('pembagian_wilayah')->get();
+
+        $output = array(
+            "success" => false,
+            "items" => array()
+        );
+        // foreach($listTujuanKredit as $dt){
+        //     $kodeWilayah = $dt->nama_tujuan;
+        //     if(strlen($kodeWilayah)==4){
+        //         $output['items'][] = array(
+        //             'kode_wilayah' => $dt->kode_wilayah,
+        //             'wilayah' => $dt->nama_wilayah,
+        //           );
+        //     }
+        // }
+        $output['success'] = true;  
+        $output['data'] = $listTujuanKredit;  
+        return $output;
+    }
+
 
 
 

@@ -11,7 +11,7 @@ class HelperController extends Controller
 
 
     public static function encryptData($encString){
-        $password = 'c3VtdXRyaXRlbA==';
+        $password = env('PASSWORD_AES');
         $method = 'aes-256-cbc';
         $iv = chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0);
 
@@ -21,7 +21,7 @@ class HelperController extends Controller
         return base64_encode(openssl_encrypt($encString, $method, $password, OPENSSL_RAW_DATA, $iv));
     }
     public static function decryptData($decString){
-        $password = 'c3VtdXRyaXRlbA==';
+        $password = env('PASSWORD_AES');
         $method = 'aes-256-cbc';
         $iv = chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0) . chr(0x0);
 
@@ -30,6 +30,8 @@ class HelperController extends Controller
 
         return openssl_decrypt(base64_decode($decString), $method, $password, OPENSSL_RAW_DATA, $iv);
     }
+
+
 
 
 }
